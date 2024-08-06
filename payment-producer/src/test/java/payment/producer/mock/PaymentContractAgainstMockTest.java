@@ -18,10 +18,11 @@ class PaymentContractAgainstMockTest {
 
     @BeforeAll
     static void beforeAll() {
-        server = MockServer.feature("classpath:payment/producer/mock/payment-mock.feature").http(0).build();
+        server = MockServer.feature("../contract-broker/payment-service-mock.feature").http(0).build();
+//        server = MockServer.feature("classpath:payment/producer/mock/payment-mock.feature").http(0).build();
     }
 
-//    @Test
+    @Test
     void testMock() {
         String paymentServiceUrl = "http://localhost:" + server.getPort();
         Results results = Runner.path("classpath:payment/producer/contract/payment-contract.feature")

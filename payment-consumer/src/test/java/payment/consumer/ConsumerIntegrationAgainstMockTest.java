@@ -19,7 +19,8 @@ class ConsumerIntegrationAgainstMockTest {
 
     @BeforeAll
     static void beforeAll() {
-        File file = new File("../payment-producer/src/test/java/payment/producer/mock/payment-mock.feature");
+        File file = new File("../contract-broker/payment-service-mock.feature");
+//        File file = new File("../payment-producer/src/test/java/payment/producer/mock/payment-mock.feature");
         server = MockServer.feature(file).http(0).build();
         String paymentServiceUrl = "http://localhost:" + server.getPort();
         consumer = new Consumer(paymentServiceUrl);
