@@ -8,6 +8,9 @@ import org.apache.commons.io.IOUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import payment.producer.Payment;
+import payment.producer.QueueConsumer;
+import com.intuit.karate.JsonUtils;
+import javax.jms.TextMessage;
 
 /**
  *
@@ -20,8 +23,15 @@ public class Consumer {
     private final String paymentServiceUrl;
     private final ObjectMapper mapper = new ObjectMapper();
 
+    private final QueueConsumer queueConsumer;
+
     public Consumer(String paymentServiceUrl) {
+        this(paymentServiceUrl,"test");
+    }
+
+    public Consumer(String paymentServiceUrl, String queueName) {
         this.paymentServiceUrl = paymentServiceUrl;
+        queueConsumer = new QueueConsumer(queueName);
     }
 
     private HttpURLConnection getConnection(String path) throws Exception {
@@ -43,9 +53,30 @@ public class Consumer {
             }
             String content = IOUtils.toString(con.getInputStream(), StandardCharsets.UTF_8);
             return mapper.readValue(content, Payment.class);
+//            return JsonUtils.fromJson(content, Payment.class);
         } catch (Exception e) {
             throw new RuntimeException(e);
         }
     }
+
+    public void listen(java.util.function.Consumer<String> handler) {
+        queueConsumer.setMessageListener(message -> {
+            try {
+                TextMessage tm = (TextMessage) message;
+                String json = tm.getText();
+                logger.info("*** received message: {}", json);
+                handler.accept(json);
+            } catch (Exception e) {
+                throw new RuntimeException(e);
+            }
+        });
+    }
+
+    public void stopQueueConsumer() {
+        queueConsumer.setMessageListener(null);
+        queueConsumer.stop();
+    }
+
+
 
 }
