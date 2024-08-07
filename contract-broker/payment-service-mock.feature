@@ -3,7 +3,7 @@ Feature: payment service mock
   Background:
     * def nextId = call read('increment.js')
     * def payments = {}
-#    * def QueueUtils = Java.type('mock.contract.QueueUtils')
+    * def QueueUtils = Java.type('payment.producer.QueueUtils')
     * configure cors = true
 
   Scenario: pathMatches('/payments') && methodIs('post')
@@ -13,7 +13,7 @@ Feature: payment service mock
     * payments[id + ''] = payment
     * def response = payment
     * string json  = { paymentId: '#(id)', status: 'shipped' }
-#    * QueueUtils.send(queueName, json, 25)
+    * QueueUtils.send(queueName, json, 25)
 
   Scenario: pathMatches('/payments')
     * def response = $payments.*

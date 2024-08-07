@@ -19,6 +19,9 @@ import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.server.ResponseStatusException;
+import org.springframework.beans.factory.annotation.Value;
+import com.intuit.karate.JsonUtils;
+import java.util.stream.Stream;
 
 /**
  *
@@ -27,6 +30,9 @@ import org.springframework.web.server.ResponseStatusException;
 @Configuration
 @EnableAutoConfiguration
 public class PaymentService {
+
+    @Value("${queue.name}")
+    private String queueName;
 
     @RestController
     @RequestMapping("/payments")
@@ -40,6 +46,11 @@ public class PaymentService {
             int id = counter.incrementAndGet();
             payment.setId(id);
             payments.put(id, payment);
+            // add queue
+            Shipment shipment = new Shipment();
+            shipment.setPaymentId(id);
+            shipment.setStatus("shipped");
+            QueueUtils.send(queueName, JsonUtils.toJson(shipment), 25);
             return payment;
         }
 
@@ -74,8 +85,16 @@ public class PaymentService {
     }
 
     public static ConfigurableApplicationContext start(int port) {
-        return SpringApplication.run(PaymentService.class, new String[]{"--server.port=" + port});
+        return start("test", port);
+//        return SpringApplication.run(PaymentService.class, new String[]{"--server.port=" + port});
     }
+
+    public static ConfigurableApplicationContext start(String queueName, int port) {
+        Stream<String> args = Stream.of("--server.port=" + port, "--queue.name=" + queueName);
+        return SpringApplication.run(PaymentService.class, args.toArray(String[]::new));
+    }
+
+
 
     public static void stop(ConfigurableApplicationContext context) {
         SpringApplication.exit(context, () -> 0);
@@ -92,7 +111,7 @@ public class PaymentService {
     }
 
     public static void main(String[] args) {
-        start(8090);
+        start("test",8090);
     }
 
 }

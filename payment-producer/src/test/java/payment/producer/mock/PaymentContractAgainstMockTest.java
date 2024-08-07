@@ -15,10 +15,14 @@ import org.junit.jupiter.api.Test;
 class PaymentContractAgainstMockTest {
 
     static MockServer server;
+    static String queueName = "mock";
 
     @BeforeAll
     static void beforeAll() {
-        server = MockServer.feature("../contract-broker/payment-service-mock.feature").http(0).build();
+        server = MockServer.feature("../contract-broker/payment-service-mock.feature")
+                .arg("queueName", queueName)
+                .http(0)
+                .build();
 //        server = MockServer.feature("classpath:payment/producer/mock/payment-mock.feature").http(0).build();
     }
 
@@ -27,6 +31,7 @@ class PaymentContractAgainstMockTest {
         String paymentServiceUrl = "http://localhost:" + server.getPort();
         Results results = Runner.path("classpath:payment/producer/contract/payment-contract.feature")
                 .systemProperty("payment.service.url", paymentServiceUrl)
+                .systemProperty("shipping.queue.name", queueName)
                 .parallel(1);
         assertTrue(results.getFailCount() == 0, results.getErrorMessages());
     }

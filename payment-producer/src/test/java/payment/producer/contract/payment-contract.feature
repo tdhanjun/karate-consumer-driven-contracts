@@ -1,7 +1,11 @@
 Feature: payment service contract test
 
 Background:
-* url paymentServiceUrl + '/payments'
+    * def QueueConsumer = Java.type('payment.producer.QueueConsumer')
+    * def queue = new QueueConsumer(queueName)
+    * def handler = function(msg){ karate.signal(msg) }
+    * queue.listen(karate.toJava(handler))
+    * url paymentServiceUrl + '/payments'
 
 Scenario: create, get, update, list and delete payments
     Given request { amount: 5.67, description: 'test one' }
@@ -9,6 +13,10 @@ Scenario: create, get, update, list and delete payments
     Then status 200
     And match response == { id: '#number', amount: 5.67, description: 'test one' }
     And def id = response.id
+    * listen 5000
+    * json shipment = listenResult
+    * print '### received:', listenResult
+    * match shipment == { paymentId: '#(id)', status: 'shipped' }
 
     Given path id
     When method get

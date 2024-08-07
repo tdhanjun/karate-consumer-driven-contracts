@@ -20,6 +20,7 @@
         <spring.boot.version>2.3.4.RELEASE</spring.boot.version>
         <junit5.version>5.7.0</junit5.version>
         <karate.version>1.4.1</karate.version>
+        <activemq.version>5.15.16</activemq.version>
     </properties>    
 
     <dependencies>
@@ -27,8 +28,8 @@
             <groupId>com.intuit.karate</groupId>
             <artifactId>karate-core</artifactId>
             <version>${karate.version}</version>
-            <scope>test</scope>
         </dependency>
+
         <dependency>
             <groupId>org.junit.jupiter</groupId>
             <artifactId>junit-jupiter-api</artifactId>

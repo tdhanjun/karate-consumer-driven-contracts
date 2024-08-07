@@ -15,10 +15,11 @@ import payment.producer.PaymentService;
  */
 class PaymentContractTest {
     static ConfigurableApplicationContext context;
+    static String queueName = "test";
 
     @BeforeAll
     static void beforeAll() {
-        context = PaymentService.start(0);
+        context = PaymentService.start(queueName, 0);
     }
 
     @Test
@@ -26,6 +27,7 @@ class PaymentContractTest {
         String paymentServiceUrl = "http://localhost:" + PaymentService.getPort(context);
         Results results = Runner.path("classpath:payment/producer/contract/payment-contract.feature")
                 .systemProperty("payment.service.url", paymentServiceUrl)
+                .systemProperty("shipping.queue.name", queueName)
                 .parallel(1);
         assertTrue(results.getFailCount() == 0, results.getErrorMessages());
     }
